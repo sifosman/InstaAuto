@@ -1,103 +1,154 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState } from 'react';
+
+type Schedule = { enabled: boolean; hours: number[] };
+type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
+type Post = { id: number; date?: string | null; headline?: string | null; image_strategy?: string | null; status?: string | null };
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [sched, setSched] = useState<Schedule>({ enabled: true, hours: [8] });
+  const [profile, setProfile] = useState<Profile>({});
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
+  const primary = profile.brand_primary_hex || '#0A84FF';
+  const accent = profile.brand_accent_hex || '#00C2A8';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    (async () => {
+      try {
+        const [schedRes, profRes, postsRes] = await Promise.all([
+          fetch('/api/schedule'),
+          fetch('/api/profile'),
+          fetch('/api/posts/recent'),
+        ]);
+        const schedData = await schedRes.json();
+        const profData = await profRes.json();
+        const postsData = await postsRes.json();
+        const p = profData?.profile || {};
+        const s = schedData?.profile || {};
+        setProfile(p);
+        setSched({ enabled: !!s.enabled, hours: s.schedule_hours || [8] });
+        setPosts(postsData?.posts || []);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  async function runNow() {
+    setRunning(true);
+    try {
+      const res = await fetch('/api/run-now', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Run failed');
+      alert('Triggered daily workflow');
+    } catch (e: any) {
+      alert(e.message || 'Run failed');
+    } finally { setRunning(false); }
+  }
+
+  return (
+    <main className="space-y-6">
+      {/* Hero / Greeting */}
+      <section className="rounded-2xl p-6 bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(90deg, ${primary}33, ${accent}33)` }}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold">Welcome{profile.company_name ? `, ${profile.company_name}` : ''}</h1>
+            <p className="text-sm text-gray-700">Your Instagram automation overview</p>
+          </div>
+          {profile.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.logo_url} alt="logo" className="h-10 w-auto rounded" />
+          ) : null}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Actions row */}
+      <section className="grid md:grid-cols-4 gap-4">
+        <DashCard title="Upload" href="/upload" gradient={`${primary}, ${accent}`}>
+          Upload images for img2img or I2V videos.
+        </DashCard>
+        <DashCard title="Create Post" href="/posts" gradient={`${accent}, ${primary}`}>
+          Insert a test row in ig_posts.
+        </DashCard>
+        <DashCard title="Profile" href="/profile" gradient={`${primary}, #6EE7F9`}>
+          Company name, colors, logo.
+        </DashCard>
+        <DashCard title="Schedule" href="/schedule" gradient={`#A78BFA, ${accent}`}>
+          Enable/disable and set hours.
+        </DashCard>
+      </section>
+
+      {/* Main grid: left content + right sidebar */}
+      <section className="grid lg:grid-cols-3 gap-6">
+        {/* Left: Recent posts + status */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold">Recent posts</h2>
+              <a className="text-sm text-blue-700 underline" href="/posts">Add new</a>
+            </div>
+            {loading ? (
+              <p className="text-sm text-gray-600">Loading...</p>
+            ) : posts.length === 0 ? (
+              <p className="text-sm text-gray-600">No posts yet</p>
+            ) : (
+              <ul className="divide-y">
+                {posts.map((p) => (
+                  <li key={p.id} className="py-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{p.headline || 'Untitled'}</p>
+                      <p className="text-xs text-gray-600">{p.date || 'No date'} • {p.image_strategy || 'ai'} • {p.status || 'todo'}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100">#{p.id}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Schedule & controls */}
+        <div className="space-y-6">
+          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+            <h2 className="font-semibold mb-2">Schedule</h2>
+            {loading ? (
+              <p className="text-sm text-gray-600">Loading...</p>
+            ) : (
+              <div className="text-sm text-gray-700 space-y-1">
+                <p>Status: <span className={sched.enabled? 'text-green-700':'text-red-700'}>{sched.enabled? 'Enabled':'Paused'}</span></p>
+                <p>Hours: {Array.isArray(sched.hours)? sched.hours.join(', ') : '—'}</p>
+                <a className="text-blue-700 underline" href="/schedule">Manage schedule →</a>
+              </div>
+            )}
+            <button onClick={runNow} disabled={running} className="mt-4 px-4 py-2 rounded bg-black text-white disabled:opacity-60">{running? 'Triggering...' : 'Run now'}</button>
+          </div>
+
+          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+            <h2 className="font-semibold mb-2">Profile</h2>
+            <div className="text-sm text-gray-700 space-y-1">
+              <p>Company: {profile.company_name || '—'}</p>
+              <p>Brand: <span style={{ background: primary }} className="inline-block w-3 h-3 rounded align-middle mr-1" /> <span style={{ background: accent }} className="inline-block w-3 h-3 rounded align-middle mr-1" />
+                <span className="align-middle">{primary} / {accent}</span>
+              </p>
+              <a className="text-blue-700 underline" href="/profile">Edit profile →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function DashCard({ title, href, children, gradient }: { title: string; href: string; children: React.ReactNode; gradient: string }) {
+  return (
+    <a href={href} className="group block rounded-2xl p-4 border bg-white/60 backdrop-blur hover:shadow-lg transition relative overflow-hidden">
+      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `linear-gradient(135deg, ${gradient})` }} />
+      <div className="relative">
+        <h3 className="font-semibold mb-1">{title}</h3>
+        <p className="text-sm text-gray-700">{children}</p>
+      </div>
+    </a>
   );
 }
