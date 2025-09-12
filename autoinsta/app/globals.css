@@ -100,3 +100,23 @@ body {
 @media (max-width: 1024px) { .thumb-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .thumb-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .thumb { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4); }
+
+/* Fancy action card (namespaced to avoid conflicts) */
+.fancy-parent { width: 100%; max-width: 320px; height: 300px; perspective: 1000px; margin: 0 auto; }
+.fancy-card { height: 100%; border-radius: 30px; background: linear-gradient(135deg, var(--fc-a, #00ffd6) 0%, var(--fc-b, #08e260) 100%); transition: all .5s ease-in-out; transform-style: preserve-3d; box-shadow: rgba(5,71,17,0) 40px 50px 25px -40px, rgba(5,71,17,.2) 0 25px 25px -5px; position: relative; overflow: hidden; }
+.fancy-glass { transform-style: preserve-3d; position: absolute; inset: 8px; border-radius: 35px; border-top-right-radius: 100%; background: linear-gradient(0deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,.9) 100%); transform: translate3d(0,0,25px); border-left: 1px solid white; border-bottom: 1px solid white; transition: all .5s ease-in-out; }
+.fancy-content { padding: 100px 24px 0 24px; transform: translate3d(0,0,26px); }
+.fancy-title { display: block; color: color-mix(in oklab, var(--fc-b) 60%, black); font-weight: 800; font-size: 20px; }
+.fancy-text { display: block; color: color-mix(in oklab, var(--fc-b) 45%, black); font-size: 14px; margin-top: 10px; }
+.fancy-bottom { padding: 12px; transform-style: preserve-3d; position: absolute; bottom: 20px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: flex-end; transform: translate3d(0,0,26px); }
+.fancy-link { background: none; border: none; color: var(--fc-link, #0aa56a); font-weight: 800; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.fancy-logo { position: absolute; right: 0; top: 0; transform-style: preserve-3d; }
+.fancy-logo .fancy-circle { display: block; position: absolute; aspect-ratio: 1; border-radius: 50%; top: 0; right: 0; box-shadow: rgba(100,100,111,.2) -10px 10px 20px 0; backdrop-filter: blur(5px); background: color-mix(in oklab, var(--fc-a) 40%, transparent); transition: all .5s ease-in-out; }
+.fancy-logo .fancy-circle.c1 { width: 170px; transform: translate3d(0,0,20px); top: 8px; right: 8px; }
+.fancy-logo .fancy-circle.c2 { width: 140px; transform: translate3d(0,0,40px); top: 10px; right: 10px; backdrop-filter: blur(1px); transition-delay: .2s; }
+.fancy-logo .fancy-circle.c3 { width: 110px; transform: translate3d(0,0,60px); top: 17px; right: 17px; transition-delay: .4s; }
+.fancy-logo .fancy-circle.c4 { width: 80px; transform: translate3d(0,0,80px); top: 23px; right: 23px; transition-delay: .6s; }
+.fancy-parent:hover .fancy-card { transform: rotate3d(1,1,0,18deg); box-shadow: rgba(5,71,17,.3) 30px 50px 25px -40px, rgba(5,71,17,.1) 0 25px 30px 0; }
+.fancy-parent:hover .fancy-logo .fancy-circle.c2 { transform: translate3d(0,0,60px); }
+.fancy-parent:hover .fancy-logo .fancy-circle.c3 { transform: translate3d(0,0,80px); }
+.fancy-parent:hover .fancy-logo .fancy-circle.c4 { transform: translate3d(0,0,100px); }
