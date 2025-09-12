@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 
 type Schedule = { enabled: boolean; hours: number[] };
 type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
@@ -14,13 +14,21 @@ export default function Home() {
   const primary = profile.brand_primary_hex || '#0A84FF';
   const accent = profile.brand_accent_hex || '#00C2A8';
 
+  // Galleries
+  const [refImages, setRefImages] = useState<string[]>([]);
+  const [reelImages, setReelImages] = useState<string[]>([]);
+  const [productImages, setProductImages] = useState<string[]>([]);
+
   useEffect(() => {
     (async () => {
       try {
-        const [schedRes, profRes, postsRes] = await Promise.all([
+        const [schedRes, profRes, postsRes, refRes, reelRes, prodRes] = await Promise.all([
           fetch('/api/schedule'),
           fetch('/api/profile'),
           fetch('/api/posts/recent'),
+          fetch('/api/list/asset?limit=24'),
+          fetch('/api/list/video?limit=24'),
+          fetch('/api/list/product?limit=24'),
         ]);
         const schedData = await schedRes.json();
         const profData = await profRes.json();
@@ -30,6 +38,9 @@ export default function Home() {
         setProfile(p);
         setSched({ enabled: !!s.enabled, hours: s.schedule_hours || [8] });
         setPosts(postsData?.posts || []);
+        setRefImages((await refRes.json())?.items || []);
+        setReelImages((await reelRes.json())?.items || []);
+        setProductImages((await prodRes.json())?.items || []);
       } finally {
         setLoading(false);
       }
@@ -78,6 +89,34 @@ export default function Home() {
         <DashCard title="Schedule" href="/schedule" gradient={`#A78BFA, ${accent}`}>
           Enable/disable and set hours.
         </DashCard>
+      </section>
+
+      {/* Uploaders in-dashboard */}
+      <section className="grid lg:grid-cols-3 gap-6">
+        <UploadPanel
+          title="Reference Images"
+          colorClass="uploader-cyan"
+          hint="Images to use as references for posts (ig_assets)"
+          endpoint="/api/upload/asset"
+          items={refImages}
+          onUploaded={(url: string)=> setRefImages([url, ...refImages].slice(0,24))}
+        />
+        <UploadPanel
+          title="Reels Stills (I2V)"
+          colorClass="uploader-pink"
+          hint="Images to convert to reels (ig_videos)"
+          endpoint="/api/upload/video"
+          items={reelImages}
+          onUploaded={(url: string)=> setReelImages([url, ...reelImages].slice(0,24))}
+        />
+        <UploadPanel
+          title="Product Images"
+          colorClass="uploader-amber"
+          hint="Product images (ig_products)"
+          endpoint="/api/upload/product"
+          items={productImages}
+          onUploaded={(url: string)=> setProductImages([url, ...productImages].slice(0,24))}
+        />
       </section>
 
       {/* Main grid: left content + right sidebar */}
@@ -141,7 +180,7 @@ export default function Home() {
   );
 }
 
-function DashCard({ title, href, children, gradient }: { title: string; href: string; children: React.ReactNode; gradient: string }) {
+function DashCard({ title, href, children, gradient }: { title: string; href: string; children: ReactNode; gradient: string }) {
   return (
     <a href={href} className="group block rounded-2xl p-4 border bg-white/60 backdrop-blur hover:shadow-lg transition relative overflow-hidden">
       <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `linear-gradient(135deg, ${gradient})` }} />
@@ -150,5 +189,45 @@ function DashCard({ title, href, children, gradient }: { title: string; href: st
         <p className="text-sm text-gray-700">{children}</p>
       </div>
     </a>
+  );
+}
+
+function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded }:
+  { title: string; colorClass: string; hint: string; endpoint: string; items: string[]; onUploaded: (url: string)=>void }) {
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    const res = await fetch(endpoint, { method: 'POST', body: form });
+    const data = await res.json();
+    if (res.ok && data.public_url) {
+      onUploaded(data.public_url);
+    } else {
+      alert(data.error || 'Upload failed');
+    }
+    // reset
+    e.currentTarget.value = '';
+  }
+
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="font-semibold">{title}</h3>
+          <p className="text-xs text-gray-600">{hint}</p>
+        </div>
+        <div className={`input-div ${colorClass}`}>
+          <input className="input" name="file" type="file" accept="image/*" onChange={handleChange} />
+          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" strokeLinejoin="round" strokeLinecap="round" viewBox="0 0 24 24" strokeWidth="2" fill="none" stroke="currentColor" className="icon"><polyline points="16 16 12 12 8 16"></polyline><line y2="21" x2="12" y1="12" x1="12"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
+        </div>
+      </div>
+      <div className="thumb-grid">
+        {items.map((src) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={src} src={src} alt="thumb" className="thumb" />
+        ))}
+      </div>
+    </div>
   );
 }
