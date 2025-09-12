@@ -80,7 +80,7 @@ export default function Home() {
       </section>
 
       {/* Actions row (Fancy Cards) */}
-      <section className="grid md:grid-cols-2 gap-6">
+      <section className="grid md:grid-cols-3 gap-6">
         <FancyCard
           href="/profile"
           title="Business Profile"
@@ -98,6 +98,15 @@ export default function Home() {
           b={accent}
           linkColor="#5b21b6"
           cta="Manage schedule"
+        />
+        <FancyCard
+          href="/prompt/product"
+          title="Product Post Prompt"
+          text="Generate an AI-ready prompt for IG posts using your product images, price and sale tags."
+          a="#34d399"
+          b="#f59e0b"
+          linkColor="#065f46"
+          cta="Open prompt builder"
         />
       </section>
 
