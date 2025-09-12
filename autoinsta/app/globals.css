@@ -45,3 +45,58 @@ body {
 *::-webkit-scrollbar { height: 8px; width: 8px; }
 *::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
+
+/* Uploader component (from Uiverse.io, adapted with CSS vars) */
+.input-div {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  --glow: rgb(1, 235, 252);
+  border: 2px solid var(--glow);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: 0 0 100px var(--glow), inset 0 0 10px var(--glow), 0 0 5px #fff;
+  animation: flicker 2s linear infinite;
+}
+.input-div .icon {
+  color: var(--glow);
+  font-size: 2rem;
+  cursor: pointer;
+  animation: iconflicker 2s linear infinite;
+}
+.input-div .input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer !important;
+}
+.uploader-cyan { --glow: rgb(1, 235, 252); }
+.uploader-pink { --glow: rgb(255, 102, 196); }
+.uploader-amber { --glow: rgb(255, 184, 0); }
+
+@keyframes flicker {
+  0% { border: 2px solid var(--glow); box-shadow: 0 0 100px var(--glow), inset 0 0 10px var(--glow), 0 0 5px #fff; }
+  5% { border: none; box-shadow: none; }
+  10% { border: 2px solid var(--glow); box-shadow: 0 0 100px var(--glow), inset 0 0 10px var(--glow), 0 0 5px #fff; }
+  25% { border: none; box-shadow: none; }
+  30% { border: 2px solid var(--glow); box-shadow: 0 0 100px var(--glow), inset 0 0 10px var(--glow), 0 0 5px #fff; }
+  100% { border: 2px solid var(--glow); box-shadow: 0 0 100px var(--glow), inset 0 0 10px var(--glow), 0 0 5px #fff; }
+}
+@keyframes iconflicker {
+  0% { opacity: 1; }
+  5% { opacity: 0.2; }
+  10% { opacity: 1; }
+  25% { opacity: 0.2; }
+  30% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* Gallery grid thumbnails */
+.thumb-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 1024px) { .thumb-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .thumb-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.thumb { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.4); }
