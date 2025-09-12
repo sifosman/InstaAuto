@@ -48,6 +48,32 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
+
+function FancyCard({ href, title, text, a, b, linkColor, cta }:
+  { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string }) {
+  return (
+    <a href={href} className="fancy-parent block">
+      <div className="fancy-card" style={{ ['--fc-a' as any]: a, ['--fc-b' as any]: b, ['--fc-link' as any]: linkColor }}>
+        <div className="fancy-logo">
+          <span className="fancy-circle c1" />
+          <span className="fancy-circle c2" />
+          <span className="fancy-circle c3" />
+          <span className="fancy-circle c4" />
+        </div>
+        <div className="fancy-glass" />
+        <div className="fancy-content">
+          <span className="fancy-title">{title}</span>
+          <span className="fancy-text">{text}</span>
+        </div>
+        <div className="fancy-bottom">
+          <span className="fancy-link">{cta}
+            <svg className="inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}
     })();
   }, []);
 
@@ -79,20 +105,26 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Actions row */}
-      <section className="grid md:grid-cols-4 gap-4">
-        <DashCard title="Upload" href="/upload" gradient={`${primary}, ${accent}`}>
-          Upload images for img2img or I2V videos.
-        </DashCard>
-        <DashCard title="Create Post" href="/posts" gradient={`${accent}, ${primary}`}>
-          Insert a test row in ig_posts.
-        </DashCard>
-        <DashCard title="Profile" href="/profile" gradient={`${primary}, #6EE7F9`}>
-          Company name, colors, logo.
-        </DashCard>
-        <DashCard title="Schedule" href="/schedule" gradient={`#A78BFA, ${accent}`}>
-          Enable/disable and set hours.
-        </DashCard>
+      {/* Actions row (Fancy Cards) */}
+      <section className="grid md:grid-cols-2 gap-6">
+        <FancyCard
+          href="/profile"
+          title="Business Profile"
+          text="Configure company name, brand colors and logo."
+          a={primary}
+          b="#6EE7F9"
+          linkColor="#0aa56a"
+          cta="Open profile"
+        />
+        <FancyCard
+          href="/schedule"
+          title="Automation Schedule"
+          text="Enable or disable the daily workflow and set posting hours."
+          a="#A78BFA"
+          b={accent}
+          linkColor="#5b21b6"
+          cta="Manage schedule"
+        />
       </section>
 
       {/* Uploaders in-dashboard */}
