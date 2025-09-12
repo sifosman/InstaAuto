@@ -34,7 +34,8 @@ body {
   @apply bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.4)_inset,0_10px_30px_rgba(0,0,0,0.08)];
 }
 .card {
-  @apply rounded-2xl glass;
+  /* Inline utilities instead of applying custom class (Tailwind v4 doesn't allow @apply of arbitrary classes) */
+  @apply rounded-2xl bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.4)_inset,0_10px_30px_rgba(0,0,0,0.08)];
 }
 .card-hover {
   @apply transition hover:shadow-xl hover:-translate-y-0.5;
