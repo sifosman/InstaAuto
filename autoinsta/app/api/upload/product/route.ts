@@ -27,5 +27,5 @@ export async function POST(req: NextRequest) {
     .from(bucket)
     .getPublicUrl(fileName);
 
-  return NextResponse.json({ public_url: pub.publicUrl });
+  return NextResponse.json({ name: fileName, public_url: pub.publicUrl });
 }

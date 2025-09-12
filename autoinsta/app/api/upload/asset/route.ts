@@ -26,5 +26,5 @@ export async function POST(req: NextRequest) {
     .from(process.env.IG_ASSETS_BUCKET || 'ig_assets')
     .getPublicUrl(fileName);
 
-  return NextResponse.json({ public_url: pub.publicUrl });
+  return NextResponse.json({ name: fileName, public_url: pub.publicUrl });
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, ReactNode } from 'react';
 type Schedule = { enabled: boolean; hours: number[] };
 type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
 type Post = { id: number; date?: string | null; headline?: string | null; image_strategy?: string | null; status?: string | null };
+type GalleryItem = { name: string; url: string };
 
 export default function Home() {
   const [sched, setSched] = useState<Schedule>({ enabled: true, hours: [8] });
@@ -15,9 +16,12 @@ export default function Home() {
   const accent = profile.brand_accent_hex || '#00C2A8';
 
   // Galleries
-  const [refImages, setRefImages] = useState<string[]>([]);
-  const [reelImages, setReelImages] = useState<string[]>([]);
-  const [productImages, setProductImages] = useState<string[]>([]);
+  const [refImages, setRefImages] = useState<GalleryItem[]>([]);
+  const [reelImages, setReelImages] = useState<GalleryItem[]>([]);
+  const [productImages, setProductImages] = useState<GalleryItem[]>([]);
+  const [refOffset, setRefOffset] = useState(24);
+  const [reelOffset, setReelOffset] = useState(24);
+  const [prodOffset, setProdOffset] = useState(24);
 
   useEffect(() => {
     (async () => {
@@ -99,7 +103,17 @@ export default function Home() {
           hint="Images to use as references for posts (ig_assets)"
           endpoint="/api/upload/asset"
           items={refImages}
-          onUploaded={(url: string)=> setRefImages([url, ...refImages].slice(0,24))}
+          onUploaded={(item)=> setRefImages([item, ...refImages].slice(0, 500))}
+          onDelete={async (name)=>{
+            const res = await fetch('/api/delete/asset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+            if (res.ok) setRefImages(refImages.filter(i=>i.name!==name));
+          }}
+          onLoadMore={async ()=>{
+            const res = await fetch(`/api/list/asset?limit=24&offset=${refOffset}`);
+            const data = await res.json();
+            setRefImages([...refImages, ...(data.items||[])]);
+            setRefOffset(refOffset+24);
+          }}
         />
         <UploadPanel
           title="Reels Stills (I2V)"
@@ -107,7 +121,17 @@ export default function Home() {
           hint="Images to convert to reels (ig_videos)"
           endpoint="/api/upload/video"
           items={reelImages}
-          onUploaded={(url: string)=> setReelImages([url, ...reelImages].slice(0,24))}
+          onUploaded={(item)=> setReelImages([item, ...reelImages].slice(0, 500))}
+          onDelete={async (name)=>{
+            const res = await fetch('/api/delete/video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+            if (res.ok) setReelImages(reelImages.filter(i=>i.name!==name));
+          }}
+          onLoadMore={async ()=>{
+            const res = await fetch(`/api/list/video?limit=24&offset=${reelOffset}`);
+            const data = await res.json();
+            setReelImages([...reelImages, ...(data.items||[])]);
+            setReelOffset(reelOffset+24);
+          }}
         />
         <UploadPanel
           title="Product Images"
@@ -115,7 +139,17 @@ export default function Home() {
           hint="Product images (ig_products)"
           endpoint="/api/upload/product"
           items={productImages}
-          onUploaded={(url: string)=> setProductImages([url, ...productImages].slice(0,24))}
+          onUploaded={(item)=> setProductImages([item, ...productImages].slice(0, 500))}
+          onDelete={async (name)=>{
+            const res = await fetch('/api/delete/product', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+            if (res.ok) setProductImages(productImages.filter(i=>i.name!==name));
+          }}
+          onLoadMore={async ()=>{
+            const res = await fetch(`/api/list/product?limit=24&offset=${prodOffset}`);
+            const data = await res.json();
+            setProductImages([...productImages, ...(data.items||[])]);
+            setProdOffset(prodOffset+24);
+          }}
         />
       </section>
 
@@ -192,8 +226,8 @@ function DashCard({ title, href, children, gradient }: { title: string; href: st
   );
 }
 
-function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded }:
-  { title: string; colorClass: string; hint: string; endpoint: string; items: string[]; onUploaded: (url: string)=>void }) {
+function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded, onDelete, onLoadMore }:
+  { title: string; colorClass: string; hint: string; endpoint: string; items: GalleryItem[]; onUploaded: (item: GalleryItem)=>void; onDelete: (name: string)=>Promise<void> | void; onLoadMore: ()=>Promise<void> | void }) {
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -202,7 +236,7 @@ function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded }:
     const res = await fetch(endpoint, { method: 'POST', body: form });
     const data = await res.json();
     if (res.ok && data.public_url) {
-      onUploaded(data.public_url);
+      onUploaded({ name: data.name || file.name, url: data.public_url });
     } else {
       alert(data.error || 'Upload failed');
     }
@@ -223,10 +257,23 @@ function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded }:
         </div>
       </div>
       <div className="thumb-grid">
-        {items.map((src) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={src} src={src} alt="thumb" className="thumb" />
+        {items.map((it) => (
+          <div key={it.name} className="relative group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={it.url} alt="thumb" className="thumb" />
+            <button
+              type="button"
+              onClick={()=> onDelete(it.name)}
+              className="opacity-0 group-hover:opacity-100 transition absolute top-1 right-1 bg-white/80 hover:bg-red-600 hover:text-white text-xs px-2 py-0.5 rounded"
+              aria-label="Delete"
+            >×</button>
+          </div>
         ))}
+      </div>
+      <div className="mt-3 flex justify-end">
+        <button type="button" onClick={()=> onLoadMore()} className="text-xs px-3 py-1 rounded border bg-white/70 hover:bg-white">
+          Load more
+        </button>
       </div>
     </div>
   );

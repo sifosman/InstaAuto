@@ -8,11 +8,19 @@ export async function GET(req: NextRequest) {
     { auth: { persistSession: false } }
   );
   const bucket = process.env.IG_ASSETS_BUCKET || 'ig_assets';
-  const limit = Number(new URL(req.url).searchParams.get('limit') ?? 24);
+  const url = new URL(req.url);
+  const limit = Number(url.searchParams.get('limit') ?? 24);
+  const offset = Number(url.searchParams.get('offset') ?? 0);
 
-  const { data: files, error } = await supabase.storage.from(bucket).list('', { limit, sortBy: { column: 'created_at', order: 'desc' } });
+  const { data: files, error } = await supabase
+    .storage
+    .from(bucket)
+    .list('', { limit, offset, sortBy: { column: 'created_at', order: 'desc' } });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const urls = (files || []).map(f => supabase.storage.from(bucket).getPublicUrl(f.name).data.publicUrl);
-  return NextResponse.json({ items: urls });
+  const items = (files || []).map(f => ({
+    name: f.name,
+    url: supabase.storage.from(bucket).getPublicUrl(f.name).data.publicUrl,
+  }));
+  return NextResponse.json({ items });
 }
