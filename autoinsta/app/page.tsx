@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState, ReactNode, ChangeEvent } from 'react';
 
 type Schedule = { enabled: boolean; hours: number[] };
 type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
@@ -48,32 +48,6 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
-
-function FancyCard({ href, title, text, a, b, linkColor, cta }:
-  { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string }) {
-  return (
-    <a href={href} className="fancy-parent block">
-      <div className="fancy-card" style={{ ['--fc-a' as any]: a, ['--fc-b' as any]: b, ['--fc-link' as any]: linkColor }}>
-        <div className="fancy-logo">
-          <span className="fancy-circle c1" />
-          <span className="fancy-circle c2" />
-          <span className="fancy-circle c3" />
-          <span className="fancy-circle c4" />
-        </div>
-        <div className="fancy-glass" />
-        <div className="fancy-content">
-          <span className="fancy-title">{title}</span>
-          <span className="fancy-text">{text}</span>
-        </div>
-        <div className="fancy-bottom">
-          <span className="fancy-link">{cta}
-            <svg className="inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-          </span>
-        </div>
-      </div>
-    </a>
-  );
-}
     })();
   }, []);
 
@@ -138,7 +112,7 @@ function FancyCard({ href, title, text, a, b, linkColor, cta }:
           onUploaded={(item)=> setRefImages([item, ...refImages].slice(0, 500))}
           onDelete={async (name)=>{
             const res = await fetch('/api/delete/asset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-            if (res.ok) setRefImages(refImages.filter(i=>i.name!==name));
+            if (res.ok) setRefImages(refImages.filter((i: GalleryItem)=>i.name!==name));
           }}
           onLoadMore={async ()=>{
             const res = await fetch(`/api/list/asset?limit=24&offset=${refOffset}`);
@@ -156,7 +130,7 @@ function FancyCard({ href, title, text, a, b, linkColor, cta }:
           onUploaded={(item)=> setReelImages([item, ...reelImages].slice(0, 500))}
           onDelete={async (name)=>{
             const res = await fetch('/api/delete/video', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-            if (res.ok) setReelImages(reelImages.filter(i=>i.name!==name));
+            if (res.ok) setReelImages(reelImages.filter((i: GalleryItem)=>i.name!==name));
           }}
           onLoadMore={async ()=>{
             const res = await fetch(`/api/list/video?limit=24&offset=${reelOffset}`);
@@ -200,7 +174,7 @@ function FancyCard({ href, title, text, a, b, linkColor, cta }:
               <p className="text-sm text-gray-600">No posts yet</p>
             ) : (
               <ul className="divide-y">
-                {posts.map((p) => (
+                {posts.map((p: Post) => (
                   <li key={p.id} className="py-3 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">{p.headline || 'Untitled'}</p>
@@ -246,6 +220,32 @@ function FancyCard({ href, title, text, a, b, linkColor, cta }:
   );
 }
 
+function FancyCard({ href, title, text, a, b, linkColor, cta }:
+  { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string }) {
+  return (
+    <a href={href} className="fancy-parent block">
+      <div className="fancy-card" style={{ ['--fc-a' as any]: a, ['--fc-b' as any]: b, ['--fc-link' as any]: linkColor }}>
+        <div className="fancy-logo">
+          <span className="fancy-circle c1" />
+          <span className="fancy-circle c2" />
+          <span className="fancy-circle c3" />
+          <span className="fancy-circle c4" />
+        </div>
+        <div className="fancy-glass" />
+        <div className="fancy-content">
+          <span className="fancy-title">{title}</span>
+          <span className="fancy-text">{text}</span>
+        </div>
+        <div className="fancy-bottom">
+          <span className="fancy-link">{cta}
+            <svg className="inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
 function DashCard({ title, href, children, gradient }: { title: string; href: string; children: ReactNode; gradient: string }) {
   return (
     <a href={href} className="group block rounded-2xl p-4 border bg-white/60 backdrop-blur hover:shadow-lg transition relative overflow-hidden">
@@ -260,7 +260,7 @@ function DashCard({ title, href, children, gradient }: { title: string; href: st
 
 function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded, onDelete, onLoadMore }:
   { title: string; colorClass: string; hint: string; endpoint: string; items: GalleryItem[]; onUploaded: (item: GalleryItem)=>void; onDelete: (name: string)=>Promise<void> | void; onLoadMore: ()=>Promise<void> | void }) {
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const form = new FormData();
