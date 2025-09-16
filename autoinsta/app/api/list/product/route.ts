@@ -13,6 +13,9 @@ export async function GET(req: NextRequest) {
   const { data: files, error } = await supabase.storage.from(bucket).list('', { limit, sortBy: { column: 'created_at', order: 'desc' } });
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const urls = (files || []).map(f => supabase.storage.from(bucket).getPublicUrl(f.name).data.publicUrl);
-  return NextResponse.json({ items: urls });
+  const items = (files || []).map(f => ({
+    name: f.name,
+    url: supabase.storage.from(bucket).getPublicUrl(f.name).data.publicUrl,
+  }));
+  return NextResponse.json({ items });
 }

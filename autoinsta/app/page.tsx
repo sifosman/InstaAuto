@@ -32,7 +32,7 @@ export default function Home() {
           fetch('/api/posts/recent'),
           fetch('/api/list/asset?limit=24'),
           fetch('/api/list/video?limit=24'),
-          fetch('/api/list/product?limit=24'),
+          fetch('/api/list/product?limit=100'),
         ]);
         const schedData = await schedRes.json();
         const profData = await profRes.json();
@@ -160,11 +160,12 @@ export default function Home() {
             if (res.ok) setProductImages(productImages.filter(i=>i.name!==name));
           }}
           onLoadMore={async ()=>{
-            const res = await fetch(`/api/list/product?limit=24&offset=${prodOffset}`);
+            const res = await fetch(`/api/list/product?limit=100&offset=${prodOffset}`);
             const data = await res.json();
             setProductImages([...productImages, ...(data.items||[])]);
-            setProdOffset(prodOffset+24);
+            setProdOffset(prodOffset+100);
           }}
+          showLoadMore={false}
         />
       </section>
 
@@ -267,8 +268,8 @@ function DashCard({ title, href, children, gradient }: { title: string; href: st
   );
 }
 
-function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded, onDelete, onLoadMore }:
-  { title: string; colorClass: string; hint: string; endpoint: string; items: GalleryItem[]; onUploaded: (item: GalleryItem)=>void; onDelete: (name: string)=>Promise<void> | void; onLoadMore: ()=>Promise<void> | void }) {
+function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded, onDelete, onLoadMore, showLoadMore = true }:
+  { title: string; colorClass: string; hint: string; endpoint: string; items: GalleryItem[]; onUploaded: (item: GalleryItem)=>void; onDelete: (name: string)=>Promise<void> | void; onLoadMore: ()=>Promise<void> | void; showLoadMore?: boolean }) {
   async function handleChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -311,11 +312,13 @@ function UploadPanel({ title, colorClass, hint, endpoint, items, onUploaded, onD
           </div>
         ))}
       </div>
-      <div className="mt-3 flex justify-end">
-        <button type="button" onClick={()=> onLoadMore()} className="text-xs px-3 py-1 rounded border bg-white/70 hover:bg-white">
-          Load more
-        </button>
-      </div>
+      {showLoadMore && (
+        <div className="mt-3 flex justify-end">
+          <button type="button" onClick={()=> onLoadMore()} className="text-xs px-3 py-1 rounded border bg-white/70 hover:bg-white">
+            Load more
+          </button>
+        </div>
+      )}
     </div>
   );
 }
