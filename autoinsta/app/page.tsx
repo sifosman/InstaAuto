@@ -64,23 +64,101 @@ export default function Home() {
   }
 
   return (
-    <main className="space-y-6">
-      {/* Hero / Greeting */}
-      <section className="rounded-2xl p-6 bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(90deg, ${primary}33, ${accent}33)` }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Welcome{profile.company_name ? `, ${profile.company_name}` : ''}</h1>
-            <p className="text-sm text-gray-700">Your Instagram automation overview</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#f7f5f0] to-[#ede8e0]">
+      {/* Navigation Header */}
+      <header className="nav-header">
+        <div className="nav-logo">InstaAuto</div>
+        <nav className="nav-menu">
+          <div className="nav-item active">Dashboard</div>
+          <div className="nav-item">Analytics</div>
+          <div className="nav-item">Content</div>
+          <div className="nav-item">Schedule</div>
+          <div className="nav-item">Settings</div>
+        </nav>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${sched.enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+            <span className="text-sm font-medium">{sched.enabled ? 'Active' : 'Inactive'}</span>
           </div>
-          {profile.logo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={profile.logo_url} alt="logo" className="h-10 w-auto rounded" />
-          ) : null}
+          {profile.logo_url && (
+            <img src={profile.logo_url} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+          )}
         </div>
-      </section>
+      </header>
+
+      <main className="p-8 space-y-8">
+        {/* Welcome Section */}
+        <section className="animate-fade-in-up section-spacing">
+          <h1 className="heading-xl mb-3">
+            Welcome in{profile.company_name ? `, ${profile.company_name}` : ''}
+          </h1>
+          <p className="body-lg">Manage your Instagram automation and content strategy</p>
+        </section>
+
+        {/* Enhanced Profile Section */}
+        <section className="profile-section animate-fade-in-up section-spacing">
+          <div className="profile-header">
+            {profile.logo_url ? (
+              <img src={profile.logo_url} alt="Company Logo" className="profile-avatar-large" />
+            ) : (
+              <div className="profile-avatar-large bg-gradient-to-br from-[var(--accent-yellow)] to-[var(--accent-orange)] flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">
+                  {profile.company_name ? profile.company_name.charAt(0).toUpperCase() : 'C'}
+                </span>
+              </div>
+            )}
+            <div className="profile-details">
+              <h2>{profile.company_name || 'Your Company'}</h2>
+              <p className="subtitle">Instagram Automation Dashboard</p>
+              <div className="profile-status">
+                <div className={`w-2 h-2 rounded-full ${sched.enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <span>{sched.enabled ? 'Automation Active' : 'Automation Paused'}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="profile-metrics">
+            <div className="metric-item">
+              <h3 className="metric-value">{posts.length}</h3>
+              <p className="metric-label">Total Posts</p>
+            </div>
+            <div className="metric-item">
+              <h3 className="metric-value">{refImages.length + reelImages.length + productImages.length}</h3>
+              <p className="metric-label">Assets</p>
+            </div>
+            <div className="metric-item">
+              <h3 className="metric-value">{sched.hours?.length || 0}</h3>
+              <p className="metric-label">Daily Posts</p>
+            </div>
+            <div className="metric-item">
+              <h3 className="metric-value">24/7</h3>
+              <p className="metric-label">Monitoring</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Stats Overview */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up section-spacing">
+          <div className="stats-card card-hover">
+            <h3 className="stats-number">{posts.length}</h3>
+            <p className="stats-label">Posts</p>
+          </div>
+          <div className="stats-card card-hover">
+            <h3 className="stats-number">{refImages.length}</h3>
+            <p className="stats-label">References</p>
+          </div>
+          <div className="stats-card card-hover">
+            <h3 className="stats-number">{reelImages.length}</h3>
+            <p className="stats-label">Reels</p>
+          </div>
+          <div className="stats-card card-hover">
+            <h3 className="stats-number">{productImages.length}</h3>
+            <p className="stats-label">Products</p>
+          </div>
+        </section>
 
       {/* Actions row (Fancy Cards) */}
-      <section className="grid md:grid-cols-3 gap-6">
+      <section className="grid md:grid-cols-3 gap-6 section-spacing">
         <FancyCard
           href="/profile"
           title="Business Profile"
@@ -110,8 +188,10 @@ export default function Home() {
         />
       </section>
 
-      {/* Uploaders in-dashboard */}
-      <section className="grid lg:grid-cols-3 gap-6">
+      {/* Content Management */}
+      <section className="section-spacing">
+        <h2 className="heading-md mb-6">Content Management</h2>
+        <div className="grid lg:grid-cols-3 gap-6">
         <UploadPanel
           title="Reference Images"
           colorClass="uploader-cyan"
@@ -167,10 +247,13 @@ export default function Home() {
           }}
           showLoadMore={false}
         />
+        </div>
       </section>
 
-      {/* Main grid: left content + right sidebar */}
-      <section className="grid lg:grid-cols-3 gap-6">
+      {/* Dashboard Overview */}
+      <section className="section-spacing">
+        <h2 className="heading-md mb-6">Dashboard Overview</h2>
+        <div className="grid lg:grid-cols-3 gap-6">
         {/* Left: Recent posts + status */}
         <div className="lg:col-span-2 space-y-6">
           <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
@@ -224,6 +307,7 @@ export default function Home() {
               <a className="text-blue-700 underline" href="/profile">Edit profile →</a>
             </div>
           </div>
+        </div>
         </div>
       </section>
     </main>
