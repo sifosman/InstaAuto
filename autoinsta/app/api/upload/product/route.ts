@@ -27,5 +27,29 @@ export async function POST(req: NextRequest) {
     .from(bucket)
     .getPublicUrl(fileName);
 
+  // Fire n8n webhook to trigger downstream workflow (one event per upload)
+  // We intentionally do not fail this API if the webhook request fails.
+  try {
+    const webhookUrl = process.env.N8N_PRODUCT_CREATED_WEBHOOK || 'https://sifosman.app.n8n.cloud/webhook/product-created';
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: fileName,
+        url: pub.publicUrl,
+        bucket,
+        mime: file.type,
+        size: arrayBuffer.byteLength,
+        ts: new Date().toISOString(),
+      }),
+      // Avoid caching
+      cache: 'no-store',
+    });
+  } catch (e) {
+    // Swallow errors to keep upload UX smooth; logs would go to server console
+    console.warn('n8n webhook call failed for product upload', e);
+  }
+
   return NextResponse.json({ name: fileName, public_url: pub.publicUrl });
 }
+
