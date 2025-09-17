@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState, ReactNode, ChangeEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '../lib/supabaseClient';
 
 type Schedule = { enabled: boolean; hours: number[] };
 type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
@@ -8,6 +10,7 @@ type GalleryItem = { name: string; url: string };
 type FancyCardProps = { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string };
 
 export default function Home() {
+  const router = useRouter();
   const [sched, setSched] = useState<Schedule>({ enabled: true, hours: [8] });
   const [profile, setProfile] = useState<Profile>({});
   const [posts, setPosts] = useState<Post[]>([]);
@@ -23,6 +26,16 @@ export default function Home() {
   const [refOffset, setRefOffset] = useState(24);
   const [reelOffset, setReelOffset] = useState(24);
   const [prodOffset, setProdOffset] = useState(24);
+
+  // Auth guard: redirect unauthenticated users to /login
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data?.session) {
+        router.replace('/login');
+      }
+    })();
+  }, [router]);
 
   useEffect(() => {
     (async () => {
