@@ -5,6 +5,7 @@ type Schedule = { enabled: boolean; hours: number[] };
 type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
 type Post = { id: number; date?: string | null; headline?: string | null; image_strategy?: string | null; status?: string | null };
 type GalleryItem = { name: string; url: string };
+type FancyCardProps = { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string };
 
 export default function Home() {
   const [sched, setSched] = useState<Schedule>({ enabled: true, hours: [8] });
@@ -314,8 +315,7 @@ export default function Home() {
   );
 }
 
-function FancyCard({ href, title, text, a, b, linkColor, cta }:
-  { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string }) {
+function FancyCard({ href, title, text, a, b, linkColor, cta }: FancyCardProps) {
   return (
     <a href={href} className="fancy-parent block">
       <div className="fancy-card" style={{ ['--fc-a' as any]: a, ['--fc-b' as any]: b, ['--fc-link' as any]: linkColor }}>
