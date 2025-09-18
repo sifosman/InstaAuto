@@ -4,7 +4,21 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabaseClient';
 
 type Schedule = { enabled: boolean; hours: number[] };
-type Profile = { company_name?: string; logo_url?: string; brand_primary_hex?: string; brand_accent_hex?: string };
+type Profile = {
+  company_name?: string;
+  logo_url?: string;
+  brand_primary_hex?: string;
+  brand_accent_hex?: string;
+  industry?: string;
+  target_audience?: string;
+  brand_voice?: string;
+  products_services?: string;
+  website?: string;
+  location?: string;
+  goals?: string;
+  hashtags?: string[] | string;
+  content_pillars?: string[] | string;
+};
 type Post = { id: number; date?: string | null; headline?: string | null; image_strategy?: string | null; status?: string | null };
 type GalleryItem = { name: string; url: string };
 type FancyCardProps = { href: string; title: string; text: string; a: string; b: string; linkColor: string; cta: string };
@@ -16,6 +30,8 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<string>("");
   const primary = profile.brand_primary_hex || '#0A84FF';
   const accent = profile.brand_accent_hex || '#00C2A8';
 
@@ -75,6 +91,27 @@ export default function Home() {
     } catch (e: any) {
       alert(e.message || 'Run failed');
     } finally { setRunning(false); }
+  }
+
+  async function saveProfileInline(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingProfile(true);
+    setProfileMsg('');
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      setProfile(data.profile || profile);
+      setProfileMsg('Saved');
+    } catch (err: any) {
+      setProfileMsg(err?.message || 'Error saving');
+    } finally {
+      setSavingProfile(false);
+    }
   }
 
   return (
@@ -318,8 +355,78 @@ export default function Home() {
               <p>Brand: <span style={{ background: primary }} className="inline-block w-3 h-3 rounded align-middle mr-1" /> <span style={{ background: accent }} className="inline-block w-3 h-3 rounded align-middle mr-1" />
                 <span className="align-middle">{primary} / {accent}</span>
               </p>
-              <a className="text-blue-700 underline" href="/profile">Edit profile →</a>
             </div>
+            <details className="mt-3">
+              <summary className="cursor-pointer text-sm text-blue-700">Edit business profile</summary>
+              <form onSubmit={saveProfileInline} className="mt-3 space-y-3 text-sm">
+                <div>
+                  <label className="block font-medium">Company name</label>
+                  <input className="border p-2 rounded w-full" value={profile.company_name || ''} onChange={(e)=> setProfile({ ...profile, company_name: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block font-medium">Industry</label>
+                    <input className="border p-2 rounded w-full" value={profile.industry || ''} onChange={(e)=> setProfile({ ...profile, industry: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Target audience</label>
+                    <input className="border p-2 rounded w-full" value={profile.target_audience || ''} onChange={(e)=> setProfile({ ...profile, target_audience: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium">Brand voice</label>
+                  <input className="border p-2 rounded w-full" placeholder="e.g., friendly, expert, energetic" value={profile.brand_voice || ''} onChange={(e)=> setProfile({ ...profile, brand_voice: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block font-medium">Products / Services</label>
+                  <textarea className="border p-2 rounded w-full" rows={2} value={profile.products_services || ''} onChange={(e)=> setProfile({ ...profile, products_services: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block font-medium">Website</label>
+                    <input className="border p-2 rounded w-full" value={profile.website || ''} onChange={(e)=> setProfile({ ...profile, website: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Location</label>
+                    <input className="border p-2 rounded w-full" value={profile.location || ''} onChange={(e)=> setProfile({ ...profile, location: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium">Business goals</label>
+                  <textarea className="border p-2 rounded w-full" rows={2} value={profile.goals || ''} onChange={(e)=> setProfile({ ...profile, goals: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block font-medium">Hashtags (comma-separated)</label>
+                    <input className="border p-2 rounded w-full" value={Array.isArray(profile.hashtags)? profile.hashtags.join(', ') : (profile.hashtags || '')} onChange={(e)=> setProfile({ ...profile, hashtags: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Content pillars (comma-separated)</label>
+                    <input className="border p-2 rounded w-full" value={Array.isArray(profile.content_pillars)? profile.content_pillars.join(', ') : (profile.content_pillars || '')} onChange={(e)=> setProfile({ ...profile, content_pillars: e.target.value })} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-medium">Brand primary</label>
+                    <input type="color" className="border p-1 rounded w-full h-10" value={primary} onChange={(e)=> setProfile({ ...profile, brand_primary_hex: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Brand accent</label>
+                    <input type="color" className="border p-1 rounded w-full h-10" value={accent} onChange={(e)=> setProfile({ ...profile, brand_accent_hex: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium">Logo URL</label>
+                  <input className="border p-2 rounded w-full" placeholder="https://.../logo.png" value={profile.logo_url || ''} onChange={(e)=> setProfile({ ...profile, logo_url: e.target.value })} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="submit" disabled={savingProfile} className="px-3 py-1.5 rounded bg-black text-white disabled:opacity-60">
+                    {savingProfile ? 'Saving…' : 'Save'}
+                  </button>
+                  {profileMsg && <span className="text-xs text-gray-700">{profileMsg}</span>}
+                </div>
+              </form>
+            </details>
           </div>
         </div>
         </div>
