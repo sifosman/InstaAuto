@@ -9,6 +9,15 @@ type Profile = {
   timezone?: string;
   schedule_hours?: number[];
   enabled?: boolean;
+  industry?: string;
+  target_audience?: string;
+  brand_voice?: string;
+  products_services?: string;
+  website?: string;
+  location?: string;
+  goals?: string;
+  hashtags?: string[] | string;
+  content_pillars?: string[] | string;
 };
 
 export default function ProfilePage() {
@@ -62,6 +71,48 @@ export default function ProfilePage() {
           <div>
             <label className="block text-sm font-medium">Company name</label>
             <input className="border p-2 rounded w-full" value={profile.company_name||''} onChange={e=>setProfile({...profile, company_name:e.target.value})} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Industry</label>
+              <input className="border p-2 rounded w-full" value={profile.industry||''} onChange={e=>setProfile({...profile, industry:e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Target audience</label>
+              <input className="border p-2 rounded w-full" value={profile.target_audience||''} onChange={e=>setProfile({...profile, target_audience:e.target.value})} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Brand voice</label>
+            <input className="border p-2 rounded w-full" placeholder="e.g., friendly, expert, energetic" value={profile.brand_voice||''} onChange={e=>setProfile({...profile, brand_voice:e.target.value})} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Products / Services</label>
+            <textarea className="border p-2 rounded w-full" rows={3} value={profile.products_services||''} onChange={e=>setProfile({...profile, products_services:e.target.value})} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Website</label>
+              <input className="border p-2 rounded w-full" value={profile.website||''} onChange={e=>setProfile({...profile, website:e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Location</label>
+              <input className="border p-2 rounded w-full" value={profile.location||''} onChange={e=>setProfile({...profile, location:e.target.value})} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium">Business goals</label>
+            <textarea className="border p-2 rounded w-full" rows={2} value={profile.goals||''} onChange={e=>setProfile({...profile, goals:e.target.value})} />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Hashtags (comma-separated)</label>
+              <input className="border p-2 rounded w-full" value={Array.isArray(profile.hashtags)? profile.hashtags.join(', ') : (profile.hashtags||'')} onChange={e=>setProfile({...profile, hashtags:e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Content pillars (comma-separated)</label>
+              <input className="border p-2 rounded w-full" value={Array.isArray(profile.content_pillars)? profile.content_pillars.join(', ') : (profile.content_pillars||'')} onChange={e=>setProfile({...profile, content_pillars:e.target.value})} />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

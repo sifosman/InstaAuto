@@ -17,6 +17,14 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   const body = await req.json();
   const supabase = serverClient();
+
+  // Helper to normalize list inputs (accept array or comma-separated string)
+  const toTextArray = (val: unknown): string[] | null => {
+    if (Array.isArray(val)) return val.map((v) => String(v).trim()).filter(Boolean);
+    if (typeof val === 'string') return val.split(',').map((v) => v.trim()).filter(Boolean);
+    return null;
+  };
+
   const payload = {
     company_name: body.company_name ?? null,
     brand_primary_hex: body.brand_primary_hex ?? null,
@@ -25,6 +33,15 @@ export async function PUT(req: NextRequest) {
     timezone: body.timezone ?? 'Africa/Johannesburg',
     schedule_hours: Array.isArray(body.schedule_hours) ? body.schedule_hours : [8],
     enabled: body.enabled ?? true,
+    industry: body.industry ?? null,
+    target_audience: body.target_audience ?? null,
+    brand_voice: body.brand_voice ?? null,
+    products_services: body.products_services ?? null,
+    website: body.website ?? null,
+    location: body.location ?? null,
+    goals: body.goals ?? null,
+    hashtags: toTextArray(body.hashtags),
+    content_pillars: toTextArray(body.content_pillars),
     updated_at: new Date().toISOString(),
   };
   // Upsert single row (assumes single-row table)
