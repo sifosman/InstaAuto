@@ -18,6 +18,10 @@ type Profile = {
   goals?: string;
   hashtags?: string[] | string;
   content_pillars?: string[] | string;
+  // New fields for enhanced user input system
+  content_brief?: string;
+  key_topics?: string[] | string;
+  tone_style?: string;
 };
 type Post = { id: number; date?: string | null; headline?: string | null; image_strategy?: string | null; status?: string | null };
 type GalleryItem = { name: string; url: string };
@@ -378,8 +382,16 @@ export default function Home() {
                   <input className="border p-2 rounded w-full" placeholder="e.g., friendly, expert, energetic" value={profile.brand_voice || ''} onChange={(e)=> setProfile({ ...profile, brand_voice: e.target.value })} />
                 </div>
                 <div>
+                  <label className="block font-medium">Tone & style</label>
+                  <input className="border p-2 rounded w-full" placeholder="e.g., professional, friendly, humorous" value={profile.tone_style || ''} onChange={(e)=> setProfile({ ...profile, tone_style: e.target.value })} />
+                </div>
+                <div>
                   <label className="block font-medium">Products / Services</label>
                   <textarea className="border p-2 rounded w-full" rows={2} value={profile.products_services || ''} onChange={(e)=> setProfile({ ...profile, products_services: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block font-medium">Content brief</label>
+                  <textarea className="border p-2 rounded w-full" rows={4} placeholder={"Tell us about your business and what you'd like to post about"} value={profile.content_brief || ''} onChange={(e)=> setProfile({ ...profile, content_brief: e.target.value })} />
                 </div>
                 <div className="grid grid-cols-1 gap-3">
                   <div>
@@ -403,6 +415,10 @@ export default function Home() {
                   <div>
                     <label className="block font-medium">Content pillars (comma-separated)</label>
                     <input className="border p-2 rounded w-full" value={Array.isArray(profile.content_pillars)? profile.content_pillars.join(', ') : (profile.content_pillars || '')} onChange={(e)=> setProfile({ ...profile, content_pillars: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block font-medium">Key topics (comma-separated)</label>
+                    <input className="border p-2 rounded w-full" placeholder="e.g., productivity, tech tips, industry insights" value={Array.isArray(profile.key_topics)? profile.key_topics.join(', ') : (profile.key_topics || '')} onChange={(e)=> setProfile({ ...profile, key_topics: e.target.value })} />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

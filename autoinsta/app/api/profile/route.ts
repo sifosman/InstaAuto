@@ -40,6 +40,10 @@ export async function PUT(req: NextRequest) {
     website: body.website ?? null,
     location: body.location ?? null,
     goals: body.goals ?? null,
+    // New fields for enhanced user input system
+    content_brief: body.content_brief ?? null,
+    key_topics: toTextArray(body.key_topics),
+    tone_style: body.tone_style ?? null,
     hashtags: toTextArray(body.hashtags),
     content_pillars: toTextArray(body.content_pillars),
     updated_at: new Date().toISOString(),

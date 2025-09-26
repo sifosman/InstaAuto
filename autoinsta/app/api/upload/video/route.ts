@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { generateSmartFilename } from '@/lib/ai-filename';
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -12,7 +13,8 @@ export async function POST(req: NextRequest) {
     { auth: { persistSession: false } }
   );
 
-  const fileName = file.name;
+  // Generate a descriptive, SEO-friendly filename
+  const fileName = await generateSmartFilename(file);
   const arrayBuffer = await file.arrayBuffer();
   const { error } = await supabase
     .storage
