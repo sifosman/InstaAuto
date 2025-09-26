@@ -16,12 +16,13 @@ function guessExt(mime: string): string {
   return 'webp';
 }
 
-function slugify(input: string): string {
-  return input
+function sanitizeWord(input: string): string {
+  // Lowercase, keep only letters, collapse to a single token (no spaces/hyphens)
+  const word = (input || '')
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
+    .replace(/[^a-z]+/g, '')
+    .slice(0, 20);
+  return word || 'image';
 }
 
 async function getBusinessProfile() {
@@ -49,13 +50,12 @@ async function callGeminiForFilename(base64: string, mimeType: string, profile: 
             {
               text:
                 `You will receive an image and business context.\n` +
-                `Your task: return ONLY a short, SEO-friendly filename (no spaces, use hyphens).\n` +
-                `Do not include an extension. Do not include quotes or extra words.\n` +
-                `Structure: {industry-context}_{main-subject}_{content-angle}.\n` +
-                `Example: marketing-agency_client-presentation_business-growth-strategies.\n` +
+                `Return ONLY ONE WORD (lowercase letters only) that best describes the main subject of the image.\n` +
+                `No spaces, no hyphens, no numbers, no punctuation, no quotes.\n` +
+                `Examples: laptop, portrait, sneaker, skyline, salad.\n` +
                 `Business: ${profile.company_name || ''}. Industry: ${profile.industry || ''}.\n` +
                 `Key topics: ${(profile.key_topics || []).join(', ')}. Tone: ${profile.tone_style || ''}.\n` +
-                `Brief: ${(profile.content_brief || '').slice(0, 400)}.`
+                `Brief: ${(profile.content_brief || '').slice(0, 200)}.`
             }
           ]
         }
@@ -76,15 +76,9 @@ async function callGeminiForFilename(base64: string, mimeType: string, profile: 
     const text = json?.candidates?.[0]?.content?.parts?.[0]?.text || '';
     if (!text) return null;
 
-    // Extract a single line, sanitize
-    const cleaned = text
-      .trim()
-      .replace(/^```[a-z]*\n?/i, '')
-      .replace(/```$/i, '')
-      .split(/\r?\n/)[0]
-      .trim();
-
-    return slugify(cleaned);
+    // Keep only the first token of letters
+    const token = text.trim().split(/\s+/)[0] || '';
+    return sanitizeWord(token);
   } catch {
     return null;
   }
@@ -100,12 +94,10 @@ export async function generateSmartFilename(file: File): Promise<string> {
   const profile = await getBusinessProfile();
   const aiName = await callGeminiForFilename(base64, file.type || 'image/webp', profile);
 
-  // Fallback to company/industry + original name stub
-  const fallbackBase = slugify(
-    [profile.industry || 'brand', file.name.replace(/\.[a-z0-9]+$/i, '')]
-      .filter(Boolean)
-      .join('-')
-  ) || 'upload';
+  // Fallback to a single descriptive word (industry or first key topic)
+  const fallbackBase = sanitizeWord(
+    (profile.key_topics && profile.key_topics[0]) || profile.industry || 'image'
+  );
 
   const base = aiName || fallbackBase;
   return `${base}_${ts}.${ext}`;

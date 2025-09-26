@@ -422,96 +422,27 @@ export default function Home() {
           </div>
 
           <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
-            <h2 className="font-semibold mb-2">Profile</h2>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p>Company: {profile.company_name || '—'}</p>
-              <p>Brand: <span style={{ background: primary }} className="inline-block w-3 h-3 rounded align-middle mr-1" /> <span style={{ background: accent }} className="inline-block w-3 h-3 rounded align-middle mr-1" />
-                <span className="align-middle">{primary} / {accent}</span>
-              </p>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold">Recent posts</h2>
+              <a className="text-sm text-blue-700 underline" href="/posts">Add new</a>
             </div>
-            <details className="mt-3">
-              <summary className="cursor-pointer text-sm text-blue-700">Edit business profile</summary>
-              <form onSubmit={saveProfileInline} className="mt-3 space-y-3 text-sm">
-                <div>
-                  <label className="block font-medium">Company name</label>
-                  <input className="border p-2 rounded w-full" value={profile.company_name || ''} onChange={(e)=> setProfile({ ...profile, company_name: e.target.value })} />
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <label className="block font-medium">Industry</label>
-                    <input className="border p-2 rounded w-full" value={profile.industry || ''} onChange={(e)=> setProfile({ ...profile, industry: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block font-medium">Target audience</label>
-                    <input className="border p-2 rounded w-full" value={profile.target_audience || ''} onChange={(e)=> setProfile({ ...profile, target_audience: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-medium">Brand voice</label>
-                  <input className="border p-2 rounded w-full" placeholder="e.g., friendly, expert, energetic" value={profile.brand_voice || ''} onChange={(e)=> setProfile({ ...profile, brand_voice: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block font-medium">Tone & style</label>
-                  <input className="border p-2 rounded w-full" placeholder="e.g., professional, friendly, humorous" value={profile.tone_style || ''} onChange={(e)=> setProfile({ ...profile, tone_style: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block font-medium">Products / Services</label>
-                  <textarea className="border p-2 rounded w-full" rows={2} value={profile.products_services || ''} onChange={(e)=> setProfile({ ...profile, products_services: e.target.value })} />
-                </div>
-                <div>
-                  <label className="block font-medium">Content brief</label>
-                  <textarea className="border p-2 rounded w-full" rows={4} placeholder={"Tell us about your business and what you'd like to post about"} value={profile.content_brief || ''} onChange={(e)=> setProfile({ ...profile, content_brief: e.target.value })} />
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <label className="block font-medium">Website</label>
-                    <input className="border p-2 rounded w-full" value={profile.website || ''} onChange={(e)=> setProfile({ ...profile, website: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block font-medium">Location</label>
-                    <input className="border p-2 rounded w-full" value={profile.location || ''} onChange={(e)=> setProfile({ ...profile, location: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-medium">Business goals</label>
-                  <textarea className="border p-2 rounded w-full" rows={2} value={profile.goals || ''} onChange={(e)=> setProfile({ ...profile, goals: e.target.value })} />
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  <div>
-                    <label className="block font-medium">Hashtags (comma-separated)</label>
-                    <input className="border p-2 rounded w-full" value={Array.isArray(profile.hashtags)? profile.hashtags.join(', ') : (profile.hashtags || '')} onChange={(e)=> setProfile({ ...profile, hashtags: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block font-medium">Content pillars (comma-separated)</label>
-                    <input className="border p-2 rounded w-full" value={Array.isArray(profile.content_pillars)? profile.content_pillars.join(', ') : (profile.content_pillars || '')} onChange={(e)=> setProfile({ ...profile, content_pillars: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block font-medium">Key topics (comma-separated)</label>
-                    <input className="border p-2 rounded w-full" placeholder="e.g., productivity, tech tips, industry insights" value={Array.isArray(profile.key_topics)? profile.key_topics.join(', ') : (profile.key_topics || '')} onChange={(e)=> setProfile({ ...profile, key_topics: e.target.value })} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-medium">Brand primary</label>
-                    <input type="color" className="border p-1 rounded w-full h-10" value={primary} onChange={(e)=> setProfile({ ...profile, brand_primary_hex: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="block font-medium">Brand accent</label>
-                    <input type="color" className="border p-1 rounded w-full h-10" value={accent} onChange={(e)=> setProfile({ ...profile, brand_accent_hex: e.target.value })} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-medium">Logo URL</label>
-                  <input className="border p-2 rounded w-full" placeholder="https://.../logo.png" value={profile.logo_url || ''} onChange={(e)=> setProfile({ ...profile, logo_url: e.target.value })} />
-                </div>
-                <div className="flex items-center gap-2">
-                  <button type="submit" disabled={savingProfile} className="px-3 py-1.5 rounded bg-black text-white disabled:opacity-60">
-                    {savingProfile ? 'Saving…' : 'Save'}
-                  </button>
-                  {profileMsg && <span className="text-xs text-gray-700">{profileMsg}</span>}
-                </div>
-              </form>
-            </details>
+            {loading ? (
+              <p className="text-sm text-gray-600">Loading...</p>
+            ) : posts.length === 0 ? (
+              <p className="text-sm text-gray-600">No posts yet</p>
+            ) : (
+              <ul className="divide-y">
+                {posts.map((p: Post) => (
+                  <li key={p.id} className="py-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{p.headline || 'Untitled'}</p>
+                      <p className="text-xs text-gray-600">{p.date || 'No date'} • {p.image_strategy || 'ai'} • {p.status || 'todo'}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100">#{p.id}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
         </div>
