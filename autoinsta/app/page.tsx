@@ -188,6 +188,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f7f5f0] to-[#ede8e0]">
+      {/* Navigation Header */}
+      <header className="nav-header">
+        <div className="nav-logo">InstaAuto</div>
+        <nav className="nav-menu">
+          <div className="nav-item active">Dashboard</div>
+          <div className="nav-item">Analytics</div>
+          <div className="nav-item">Content</div>
+          <div className="nav-item">Schedule</div>
+          <div className="nav-item">Settings</div>
+        </nav>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${sched.enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+            <span className="text-sm font-medium">{sched.enabled ? 'Active' : 'Inactive'}</span>
+          </div>
+          {profile.logo_url && (
+            <img src={profile.logo_url} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
+          )}
+        </div>
+      </header>
 
       <main className="p-8 space-y-8">
         {/* Welcome Section */}
