@@ -36,6 +36,8 @@ export default function Home() {
   const [running, setRunning] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState<string>("");
+  const [fbReady, setFbReady] = useState(false);
+  const [igMsg, setIgMsg] = useState<string>("");
   const primary = profile.brand_primary_hex || '#0A84FF';
   const accent = profile.brand_accent_hex || '#00C2A8';
 
@@ -56,6 +58,72 @@ export default function Home() {
       }
     })();
   }, [router]);
+
+  // Facebook SDK loader
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if ((window as any).FB) { setFbReady(true); return; }
+    const appId = process.env.NEXT_PUBLIC_FB_APP_ID;
+    if (!appId) return; // SDK not initialized without app id
+    (window as any).fbAsyncInit = function() {
+      (window as any).FB.init({
+        appId: appId,
+        cookie: true,
+        xfbml: false,
+        version: 'v19.0',
+      });
+      setFbReady(true);
+    };
+    const id = 'facebook-jssdk';
+    if (!document.getElementById(id)) {
+      const js = document.createElement('script');
+      js.id = id;
+      js.src = 'https://connect.facebook.net/en_US/sdk.js';
+      document.body.appendChild(js);
+    }
+  }, []);
+
+  async function connectInstagram() {
+    setIgMsg('');
+    try {
+      if (!(window as any).FB) throw new Error('Facebook SDK not loaded');
+      const scope = [
+        'public_profile',
+        'email',
+        'pages_show_list',
+        'pages_read_engagement',
+        'pages_manage_metadata',
+        'instagram_basic',
+        'instagram_manage_insights',
+        'business_management'
+      ].join(',');
+      await new Promise<void>((resolve, reject) => {
+        (window as any).FB.login(async (response: any) => {
+          if (response?.authResponse?.accessToken) {
+            try {
+              const res = await fetch('/api/ig/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ access_token: response.authResponse.accessToken }),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(data.error || 'Failed to forward token');
+              setIgMsg('Connected. Token sent to n8n for exchange.');
+              resolve();
+            } catch (err: any) {
+              setIgMsg(err?.message || 'Error connecting');
+              reject(err);
+            }
+          } else {
+            setIgMsg('User cancelled or missing permissions.');
+            reject(new Error('No access token'));
+          }
+        }, { scope });
+      });
+    } catch (e: any) {
+      setIgMsg(e?.message || 'Connect failed');
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -120,26 +188,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f7f5f0] to-[#ede8e0]">
-      {/* Navigation Header */}
-      <header className="nav-header">
-        <div className="nav-logo">InstaAuto</div>
-        <nav className="nav-menu">
-          <div className="nav-item active">Dashboard</div>
-          <div className="nav-item">Analytics</div>
-          <div className="nav-item">Content</div>
-          <div className="nav-item">Schedule</div>
-          <div className="nav-item">Settings</div>
-        </nav>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${sched.enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-            <span className="text-sm font-medium">{sched.enabled ? 'Active' : 'Inactive'}</span>
-          </div>
-          {profile.logo_url && (
-            <img src={profile.logo_url} alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
-          )}
-        </div>
-      </header>
 
       <main className="p-8 space-y-8">
         {/* Welcome Section */}
@@ -311,7 +359,7 @@ export default function Home() {
         <div className="grid lg:grid-cols-3 gap-6">
         {/* Left: Profile editor (moved here as requested) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+          <div className="rounded-2xl p-4 bg-white/60 backdrop-blur shadow-sm">
             <h2 className="font-semibold mb-2">Profile</h2>
             <div className="text-sm text-gray-700 space-y-1">
               <p>Company: {profile.company_name || '—'}</p>
@@ -407,7 +455,7 @@ export default function Home() {
 
         {/* Right: Schedule & controls */}
         <div className="space-y-6">
-          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+          <div className="rounded-2xl p-4 bg-white/60 backdrop-blur shadow-sm">
             <h2 className="font-semibold mb-2">Schedule</h2>
             {loading ? (
               <p className="text-sm text-gray-600">Loading...</p>
@@ -421,7 +469,7 @@ export default function Home() {
             <button onClick={runNow} disabled={running} className="mt-4 px-4 py-2 rounded bg-black text-white disabled:opacity-60">{running? 'Triggering...' : 'Run now'}</button>
           </div>
 
-          <div className="rounded-2xl border p-4 bg-white/60 backdrop-blur">
+          <div className="rounded-2xl p-4 bg-white/60 backdrop-blur shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold">Recent posts</h2>
               <a className="text-sm text-blue-700 underline" href="/posts">Add new</a>
